@@ -1,6 +1,6 @@
 # TOTP-QR-Gen
 
-TOTPify is a Python-based project for generating Time-based One-Time Password (TOTP) QR codes and validating them via a web interface.
+TOTP-QR-Gen is a Python-based project for generating Time-based One-Time Password (TOTP) QR codes and validating them via a web interface.
 
 ## 🚀 Features
 - 🔑 **TOTP Generation & Validation** using `pyotp`
@@ -51,7 +51,7 @@ TOTP_SECRETS={"alice123": "JBSWY3DPEHPK3PXP", "bob456": "NB3WY3DPEHPK3QWE"}
 
 2️⃣ **Generate QR Codes** for users:
 ```bash
-python generate_qr.py
+python totp_generator.py
 ```
 QR codes will be saved in the `static/` folder.
 
