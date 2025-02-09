@@ -1,3 +1,7 @@
+Here's your updated `README.md` with the new **Admin Dashboard** functionality included:
+
+---
+
 # TOTP-QR-Gen
 
 TOTP-QR-Gen is a Python-based project for generating Time-based One-Time Password (TOTP) QR codes and validating them via a web interface.
@@ -9,6 +13,7 @@ TOTP-QR-Gen is a Python-based project for generating Time-based One-Time Passwor
 - 📡 **Flask API for Validation**
 - 📱 **QR Code Generation** for easy scanning
 - 🌐 **Works Offline** for generating TOTP QR codes
+- 📊 **Admin Dashboard** for monitoring TOTP validation attempts
 
 ---
 
@@ -18,8 +23,10 @@ TOTP-QR-Gen/
 │── .env                   # Stores TOTP secrets securely
 │── .gitignore             # Ignore sensitive files
 │── requirements.txt       # Python dependencies
-│── app.py                 # Flask server for validation
+│── app.py                 # Flask server for validation & admin dashboard
 │── totp_generator.py      # Generates encrypted QR codes
+│── templates/             # HTML templates for admin dashboard
+│   ├── admin.html         # Admin dashboard template
 │── static/                # Stores generated QR codes
 │   ├── alice123_totp_qr.png
 │── README.md              # Project documentation
@@ -44,10 +51,10 @@ pip install -r requirements.txt
 ---
 
 ## 🔧 Setup
-1️⃣ **Create a `.env` file** and add user-specific TOTP secrets and set revalidation option:
+1️⃣ **Create a `.env` file** and add user-specific TOTP secrets and validation settings:
 ```bash
 TOTP_SECRETS={"alice123": "JBSWY3DPEHPK3PXP", "bob456": "NB3WY3DPEHPK3QWE"}
-PREVENT_REVALIDATION=false
+MAX_VALIDATIONS=3  # Number of times a single TOTP can be validated
 ```
 
 2️⃣ **Start the Flask server**
@@ -82,10 +89,29 @@ Response:
 
 ---
 
+## 📊 Admin Dashboard
+The Admin Dashboard provides real-time logs of both **successful** and **failed** validation attempts, including:
+- 🕒 **Timestamp** of the attempt  
+- 🆔 **Account ID** (if provided)  
+- ✅/❌ **Validation Status** (Success/Failed)  
+- ❌ **Failure Reason** (e.g., invalid TOTP, exceeded max attempts)  
+- 🌍 **IP Address** of the requester  
+
+### 🔍 Access the Admin Dashboard
+Once the Flask server is running, open your browser and visit:
+```
+http://127.0.0.1:5000/admin
+```
+This will display a **log of all validation attempts**.
+
+---
+
 ## 🔐 Security Measures
 - ✅ **AES-GCM Encryption** ensures TOTP codes are never exposed in plaintext
 - ✅ **Per-User Secrets** prevent unauthorized validation
 - ✅ **Short-lived TOTP codes** reduce brute-force risks
+- ✅ **Max Validation Limits** prevent excessive reuse of TOTP codes
+- ✅ **Admin Dashboard Logs** track all validation attempts for security monitoring
 
 ---
 
@@ -93,6 +119,7 @@ Response:
 - [ ] 🔄 **User management API** (Add/Remove users dynamically)
 - [ ] 🖥️ **Web UI for scanning QR codes**
 - [ ] 📡 **Docker support for easy deployment**
+- [ ] 🔐 **Admin Authentication** for secure access to logs
 
 ---
 
@@ -104,3 +131,11 @@ Feel free to submit **issues, feature requests, or pull requests**! 🚀
 ## 📜 License
 MIT License - Use it freely! 😊
 
+---
+
+### ✅ **Changes Added in This Update**
+- 🆕 **Admin Dashboard** for tracking all validation attempts  
+- 🆕 **MAX_VALIDATIONS** setting to limit how many times a TOTP can be used  
+- 🆕 **Logging of failed attempts** with reasons  
+
+Would you like any additional details or improvements? 🚀
