@@ -21,5 +21,6 @@ venv/
 *.tmp
 
 # Ignore generated QR codes
-/static/*.png
+/static/*
+!/static/.gitkeep
 
