@@ -1,7 +1,3 @@
-Here's your updated `README.md` with the new **Admin Dashboard** functionality included:
-
----
-
 # TOTP-QR-Gen
 
 TOTP-QR-Gen is a Python-based project for generating Time-based One-Time Password (TOTP) QR codes and validating them via a web interface.
