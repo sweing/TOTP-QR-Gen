@@ -49,16 +49,16 @@ pip install -r requirements.txt
 TOTP_SECRETS={"alice123": "JBSWY3DPEHPK3PXP", "bob456": "NB3WY3DPEHPK3QWE"}
 ```
 
-2️⃣ **Generate QR Codes** for users:
+2️⃣ **Start the Flask server**
+```bash
+python app.py
+```
+
+3️⃣ **Generate QR Codes** for users:
 ```bash
 python totp_generator.py
 ```
 QR codes will be saved in the `static/` folder.
-
-3️⃣ **Start the Flask server**
-```bash
-python app.py
-```
 
 ---
 
