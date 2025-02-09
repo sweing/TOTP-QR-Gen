@@ -12,6 +12,8 @@ load_dotenv()
 
 # Load user secrets from .env (stored as a JSON-like string)
 USER_SECRETS = json.loads(os.getenv("TOTP_SECRETS", "{}"))
+PREVENT_REVALIDATION = os.getenv("PREVENT_REVALIDATION", "false").lower() == "true"
+validated_totps = set()  # Store validated TOTP codes
 
 def decrypt_totp(secret_key: str, encrypted_totp: str) -> str:
     """Decrypts the TOTP code using AES-GCM with the secret key."""
@@ -51,9 +53,14 @@ def validate_totp():
     if not decrypted_totp:
         return jsonify({"success": False, "error": "Invalid TOTP encryption"}), 400
 
+    # Check if TOTP was already validated
+    if PREVENT_REVALIDATION and decrypted_totp in validated_totps:
+        return jsonify({"success": False, "error": "TOTP already validated"}), 400
+
     # Validate the TOTP
     totp = pyotp.TOTP(secret)
     if totp.verify(decrypted_totp):
+        validated_totps.add(decrypted_totp)
         return jsonify({"success": True, "message": "TOTP is valid"}), 200
     else:
         return jsonify({"success": False, "error": "Invalid TOTP"}), 400

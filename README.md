@@ -14,7 +14,7 @@ TOTP-QR-Gen is a Python-based project for generating Time-based One-Time Passwor
 
 ## 📂 Project Structure
 ```
-totp_project/
+TOTP-QR-Gen/
 │── .env                   # Stores TOTP secrets securely
 │── .gitignore             # Ignore sensitive files
 │── requirements.txt       # Python dependencies
@@ -44,9 +44,10 @@ pip install -r requirements.txt
 ---
 
 ## 🔧 Setup
-1️⃣ **Create a `.env` file** and add user-specific TOTP secrets:
+1️⃣ **Create a `.env` file** and add user-specific TOTP secrets and set revalidation option:
 ```bash
 TOTP_SECRETS={"alice123": "JBSWY3DPEHPK3PXP", "bob456": "NB3WY3DPEHPK3QWE"}
+PREVENT_REVALIDATION=false
 ```
 
 2️⃣ **Start the Flask server**
