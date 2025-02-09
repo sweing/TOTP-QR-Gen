@@ -22,7 +22,6 @@ totp_project/
 │── generate_qr.py         # Generates encrypted QR codes
 │── static/                # Stores generated QR codes
 │   ├── alice123_totp_qr.png
-│── templates/             # (Optional) Front-end templates
 │── README.md              # Project documentation
 ```
 
@@ -69,7 +68,7 @@ python app.py
 
 ## 🖼️ Usage
 ### ✅ **Step 1: Scan QR Code**
-Use an **authenticator app** (Google Authenticator, Authy, etc.) to scan the QR code.
+Use an **QR scanning app** to scan the QR code.
 
 ### ✅ **Step 2: Validate TOTP via API**
 Send a request with the encrypted TOTP:
