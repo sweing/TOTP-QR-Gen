@@ -1,0 +1,25 @@
+# Ignore environment variables and secrets
+.env
+
+# Ignore Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environment
+venv/
+
+# Ignore IDE/editor-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore log files and temporary files
+*.log
+*.tmp
+
+# Ignore generated QR codes
+/static/*.png
+
