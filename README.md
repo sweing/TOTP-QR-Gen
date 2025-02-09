@@ -19,7 +19,7 @@ totp_project/
 │── .gitignore             # Ignore sensitive files
 │── requirements.txt       # Python dependencies
 │── app.py                 # Flask server for validation
-│── generate_qr.py         # Generates encrypted QR codes
+│── totp_generator.py      # Generates encrypted QR codes
 │── static/                # Stores generated QR codes
 │   ├── alice123_totp_qr.png
 │── README.md              # Project documentation
