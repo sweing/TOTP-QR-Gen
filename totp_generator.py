@@ -4,27 +4,31 @@ import os
 import base64
 import json
 from dotenv import load_dotenv
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
-
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import base64
 # Load environment variables
 load_dotenv()
 
 # Load user secrets
 USER_SECRETS = json.loads(os.getenv("TOTP_SECRETS", "{}"))
 
-def encrypt_totp(secret_key: str, totp_code: str) -> str:
-    """Encrypts the TOTP code using AES-GCM with the secret key."""
-    key = secret_key[:32].ljust(32, '0').encode()  # Ensure key is 32 bytes
-    iv = os.urandom(12)  # Generate a random IV (Nonce) for AES-GCM
-
-    cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())
-    encryptor = cipher.encryptor()
-
-    ciphertext = encryptor.update(totp_code.encode()) + encryptor.finalize()
-    encrypted_totp = base64.urlsafe_b64encode(iv + encryptor.tag + ciphertext).decode()
-
-    return encrypted_totp
+def encrypt_totp(key, plain_text):
+    # Ensure the key is 16, 24, or 32 bytes long
+    key = key.encode('utf-8')
+    key = key.ljust(32, b'\0')[:32]  # Pad or truncate the key to 32 bytes (256 bits)
+    
+    # Create AES cipher in ECB mode
+    cipher = AES.new(key, AES.MODE_ECB)
+    
+    # Pad the plaintext to be a multiple of 16 bytes
+    plain_text = pad(plain_text.encode('utf-8'), AES.block_size)
+    
+    # Encrypt the plaintext
+    cipher_text = cipher.encrypt(plain_text)
+    
+    # Return the ciphertext as a URL-safe base64-encoded string
+    return base64.urlsafe_b64encode(cipher_text).decode('utf-8')
 
 def generate_totp_qr(account_id: str):
     """Generates a QR code with an encrypted TOTP code for a specific user."""
@@ -35,12 +39,12 @@ def generate_totp_qr(account_id: str):
     # Generate the TOTP code
     totp = pyotp.TOTP(secret)
     current_totp = totp.now()
-
+    print(current_totp)
     # Encrypt the TOTP using the secret key
     encrypted_totp = encrypt_totp(secret, current_totp)
 
     # Create a validation URL with encrypted TOTP and account ID
-    validation_url = f"http://127.0.0.1:5000/validate?account_id={account_id}&totp_enc={encrypted_totp}"
+    validation_url = f"http://192.168.66.185:5000/validate?account_id={account_id}&totp_enc={encrypted_totp}"
 
     # Print URL for testing
     print(validation_url)

@@ -5,8 +5,9 @@ from flask import Flask, request, jsonify, render_template
 import pyotp
 import base64
 from dotenv import load_dotenv
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import base64
 
 app = Flask(__name__)
 load_dotenv()
@@ -17,24 +18,25 @@ MAX_VALIDATIONS = int(os.getenv("MAX_VALIDATIONS", "1"))  # Number of times a TO
 validation_logs = []  # Store validation attempts (successful and failed)
 validation_counts = {}  # Track validation count per TOTP
 
-def decrypt_totp(secret_key: str, encrypted_totp: str) -> str:
-    """Decrypts the TOTP code using AES-GCM with the secret key."""
-    try:
-        key = secret_key[:32].ljust(32, '0').encode()  # Ensure key is 32 bytes
-        encrypted_data = base64.urlsafe_b64decode(encrypted_totp)
-
-        iv = encrypted_data[:12]  # First 12 bytes = IV (Nonce)
-        tag = encrypted_data[12:28]  # Next 16 bytes = Authentication tag
-        ciphertext = encrypted_data[28:]  # Rest = Encrypted TOTP
-
-        cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag), backend=default_backend())
-        decryptor = cipher.decryptor()
-        decrypted_totp = decryptor.update(ciphertext) + decryptor.finalize()
-
-        return decrypted_totp.decode()
-    except Exception as e:
-        print(f"Decryption error: {e}")
-        return None
+def decrypt_totp(key, cipher_text):
+    # Ensure the key is 16, 24, or 32 bytes long
+    key = key.encode('utf-8')
+    key = key.ljust(32, b'\0')[:32]  # Pad or truncate the key to 32 bytes (256 bits)
+    
+    # Create AES cipher in ECB mode
+    cipher = AES.new(key, AES.MODE_ECB)
+    
+    # Decode the URL-safe base64-encoded ciphertext
+    cipher_text = base64.urlsafe_b64decode(cipher_text)
+    
+    # Decrypt the ciphertext
+    plain_text = cipher.decrypt(cipher_text)
+    
+    # Unpad the plaintext
+    plain_text = unpad(plain_text, AES.block_size)
+    
+    # Return the plaintext as a string
+    return plain_text.decode('utf-8')
 
 @app.route('/validate', methods=['GET'])
 def validate_totp():
@@ -81,4 +83,5 @@ def admin_dashboard():
     return render_template('admin.html', validation_logs=validation_logs, max_validations=MAX_VALIDATIONS)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug=True)
+    app.run(host='192.168.66.185', port=5000, debug=True)
