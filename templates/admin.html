@@ -46,7 +46,7 @@
         <thead>
             <tr>
                 <th>Timestamp</th>
-                <th>Account ID</th>
+                <th>Device ID</th>
                 <th>Status</th>
                 <th>Reason</th>
                 <th>IP Address</th>
@@ -56,7 +56,7 @@
             {% for log in validation_logs %}
             <tr>
                 <td>{{ log.timestamp }}</td>
-                <td>{{ log.account_id if log.account_id else "N/A" }}</td>
+                <td>{{ log.device_id if log.device_id else "N/A" }}</td>
                 <td class="{% if log.status == 'success' %}success{% else %}failed{% endif %}">
                     {{ log.status.capitalize() }}
                 </td>
