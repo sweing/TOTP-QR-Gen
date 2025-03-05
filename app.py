@@ -41,40 +41,40 @@ def decrypt_totp(key, cipher_text):
 @app.route('/validate', methods=['GET'])
 def validate_totp():
     """Validates the encrypted TOTP from the QR code."""
-    account_id = request.args.get('account_id')
+    device_id = request.args.get('device_id')
     encrypted_totp = request.args.get('totp_enc')
     timestamp = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     user_ip = request.remote_addr
 
-    if not account_id or not encrypted_totp:
-        validation_logs.append({"timestamp": timestamp, "account_id": account_id, "status": "failed", "reason": "Missing parameters", "ip": user_ip})
+    if not device_id or not encrypted_totp:
+        validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "failed", "reason": "Missing parameters", "ip": user_ip})
         return jsonify({"success": False, "error": "Missing parameters"}), 400
 
     # Get the user's secret key
-    secret = USER_SECRETS.get(account_id)
+    secret = USER_SECRETS.get(device_id)
     if not secret:
-        validation_logs.append({"timestamp": timestamp, "account_id": account_id, "status": "failed", "reason": "Invalid account ID", "ip": user_ip})
+        validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "failed", "reason": "Invalid account ID", "ip": user_ip})
         return jsonify({"success": False, "error": "Invalid account ID"}), 400
 
     # Decrypt the TOTP
     decrypted_totp = decrypt_totp(secret, encrypted_totp)
     if not decrypted_totp:
-        validation_logs.append({"timestamp": timestamp, "account_id": account_id, "status": "failed", "reason": "Invalid TOTP encryption", "ip": user_ip})
+        validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "failed", "reason": "Invalid TOTP encryption", "ip": user_ip})
         return jsonify({"success": False, "error": "Invalid TOTP encryption"}), 400
 
     # Check if the TOTP has exceeded max validations
     if decrypted_totp in validation_counts and validation_counts[decrypted_totp] >= MAX_VALIDATIONS:
-        validation_logs.append({"timestamp": timestamp, "account_id": account_id, "status": "failed", "reason": "TOTP validation limit reached", "ip": user_ip})
+        validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "failed", "reason": "TOTP validation limit reached", "ip": user_ip})
         return jsonify({"success": False, "error": "TOTP validation limit reached"}), 400
 
     # Validate the TOTP
     totp = pyotp.TOTP(secret)
     if totp.verify(decrypted_totp):
         validation_counts[decrypted_totp] = validation_counts.get(decrypted_totp, 0) + 1
-        validation_logs.append({"timestamp": timestamp, "account_id": account_id, "status": "success", "ip": user_ip})
+        validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "success", "reason": "Valid TOTP", "ip": user_ip})
         return jsonify({"success": True, "message": "TOTP is valid"}), 200
     else:
-        validation_logs.append({"timestamp": timestamp, "account_id": account_id, "status": "failed", "reason": "Invalid TOTP", "ip": user_ip})
+        validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "failed", "reason": "Invalid TOTP", "ip": user_ip})
         return jsonify({"success": False, "error": "Invalid TOTP"}), 400
 
 @app.route('/admin', methods=['GET'])
@@ -83,5 +83,6 @@ def admin_dashboard():
     return render_template('admin.html', validation_logs=validation_logs, max_validations=MAX_VALIDATIONS)
 
 if __name__ == '__main__':
-    #app.run(debug=True)
-    app.run(host='192.168.66.185', port=5000, debug=True)
+    app.run(host='127.0.0.1', port=5005, debug=True)
+    #app.run(host='0.0.0.0', port=5005)
+

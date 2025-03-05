@@ -30,11 +30,11 @@ def encrypt_totp(key, plain_text):
     # Return the ciphertext as a URL-safe base64-encoded string
     return base64.urlsafe_b64encode(cipher_text).decode('utf-8')
 
-def generate_totp_qr(account_id: str):
+def generate_totp_qr(device_id: str):
     """Generates a QR code with an encrypted TOTP code for a specific user."""
-    secret = USER_SECRETS.get(account_id)
+    secret = USER_SECRETS.get(device_id)
     if not secret:
-        raise ValueError(f"TOTP secret not found for user: {account_id}")
+        raise ValueError(f"TOTP secret not found for user: {device_id}")
 
     # Generate the TOTP code
     totp = pyotp.TOTP(secret)
@@ -44,7 +44,7 @@ def generate_totp_qr(account_id: str):
     encrypted_totp = encrypt_totp(secret, current_totp)
 
     # Create a validation URL with encrypted TOTP and account ID
-    validation_url = f"http://192.168.66.185:5000/validate?account_id={account_id}&totp_enc={encrypted_totp}"
+    validation_url = f"http://192.168.66.185:5000/validate?device_id={device_id}&totp_enc={encrypted_totp}"
 
     # Print URL for testing
     print(validation_url)
@@ -61,7 +61,7 @@ def generate_totp_qr(account_id: str):
 
     # Save the QR code image
     img = qr.make_image(fill_color="black", back_color="white")
-    img_path = f"static/{account_id}_totp_qr.png"
+    img_path = f"static/{device_id}_totp_qr.png"
     img.save(img_path)
     print(f"QR code saved as '{img_path}'")
 
