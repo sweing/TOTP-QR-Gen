@@ -1,4 +1,4 @@
-### Building a Proof of Location Device: A First Microcontroller Project
+### Building Proof of Presence: A First Microcontroller Project
 
 For a while now, I’ve been fascinated by the concepts of *proof of presence* and *proof of location*. This obsession started after reading Daniel Suarez’s *[Daemon](https://en.wikipedia.org/wiki/Daemon_(novel))*, a novel that explores the implications of decentralized systems. I came across projects like 
 [FOAM](https://foam.space), which aimed to create a decentralized location protocol. However, FOAM seems to have stalled, and I unhappy with the existing options. So, I decided to do some research and see what I can come up with. 
