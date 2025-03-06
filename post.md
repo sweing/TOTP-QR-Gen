@@ -9,6 +9,8 @@ For a while now, I’ve been fascinated by the concepts of *proof of presence* a
 
 The core idea behind the project is to create a unique device that can prove location and presence. I wanted something that could generate time-based one-time passwords (TOTP) and display them as QR codes, which could then be verified. While researching, I stumbled upon a company called [Skiply](https://www.skiply.eu/en/ubiqod-key-2/) that builds devices displaying time-based QR codes. This inspired me to build my own open-source version of it.
 
+A core challenge of this project is not just generating valid TOTP-based QR codes but ensuring that they serve as genuine proof of presence. Since TOTP codes are only valid for a 30-second window, anyone attempting to validate the QR code must be physically near the device to scan it in real time. There is still the risk of relay attacks, where an attacker could share a valid QR code remotely - someone could relay the code through a photo, live video, or link. One potential solution to this problem could be implementing a cool-down period between successful validations. This would limit how often a QR code can be verified.
+
 ---
 
 ### The Hardware Setup
