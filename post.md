@@ -7,7 +7,7 @@ For a while now, I’ve been fascinated by the concepts of *proof of presence* a
 
 ### The Inspiration and the Problem
 
-The core idea behind the project is to create a device that can prove its location and unique presence. I wanted something that could generate time-based one-time passwords (TOTP) and display them as QR codes, which could then be verified. While researching, I stumbled upon a company called [Skiply](https://www.skiply.eu/en/ubiqod-key-2/) that builds devices displaying time-based QR codes. This inspired me to build my own open-source version of it.
+The core idea behind the project is to create a unique device that can prove location and presence. I wanted something that could generate time-based one-time passwords (TOTP) and display them as QR codes, which could then be verified. While researching, I stumbled upon a company called [Skiply](https://www.skiply.eu/en/ubiqod-key-2/) that builds devices displaying time-based QR codes. This inspired me to build my own open-source version of it.
 
 ---
 
