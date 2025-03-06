@@ -13,7 +13,7 @@ The core idea behind the project is to create a device that can prove its locati
 
 ### The Hardware Setup
 
-![Device Setup](pictures/device.jpg)
+![Device Setup](pictures/device.jpeg?raw=true)
 
 The first challenge was to ensure the device could keep accurate time without relying on an internet connection. I started with an ESP8266 microcontroller and its built-in Wi-Fi module, but I wanted the device to work completely offline. A friend lent me a GPS module, and I discovered that it could also receive accurate time data from GPS satellites.
 
@@ -38,13 +38,13 @@ The hardware setup:
 5. **Display**: The QR code is displayed on the e-paper screen. To make it easier for users to verify the device, I added a small square in the center of the screen showing the first two and last two digits of the TOTP number.
 6. **Deep Sleep**: After rendering the QR code, the device goes into deep sleep to save power (27 seconds).
 
-![QR Code Display](pictures/screen.jpg)
+![QR Code Display](pictures/screen.jpeg?raw=true)
 
 I set up a Flask server to verify the QR codes. When a code is scanned, the server returns a JSON response confirming the validity.
 
 At this stage, the device is fully functional. It can generate and display QR codes, and the Flask server can verify them.
 
-![Verification JSON](pictures/verification.jpg)
+![Verification JSON](pictures/verification.jpeg)
 
 ---
 
@@ -58,7 +58,7 @@ At this stage, the device is fully functional. It can generate and display QR co
 
 If you’re interested in following this project, feel free to reach out or leave a comment. I’ll be sharing updates of my progress!
 
-[Project on GitHub](https://github.com/sweing/TOTP-QR-Gen)
+[Project on GitHub](https://github.com/sweing/TOTP-QR-Gen?raw=true)
 
 
 ---
