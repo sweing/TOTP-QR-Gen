@@ -33,7 +33,7 @@ The hardware setup:
 
 1. **Boot-Up**: On startup, the device begins acquiring a GPS signal to get the current time and location. This process usually takes up to 2 minutes.
 2. **GPS Shutdown**: Once the GPS module has acquired GPS data, it’s turned off using the 2N2222 transistor.
-3. **TOTP Generation**: The device waits until the next half-minute mark, then generates a TOTP number using a hard-coded key. This number is encrypted to prevent brute-force attacks.
+3. **TOTP Generation**: The device waits until the next half-minute mark, then generates a TOTP number using a hard-coded key. 
 4. **QR Code Creation**: A link is generated containing the device ID and the encrypted TOTP number. In the future, I want to add the location data as well (which also would have to be encoded).
 5. **Display**: The QR code is displayed on the e-paper screen. To make it easier for users to verify the device, I added a small square in the center of the screen showing the first two and last two digits of the TOTP number.
 6. **Deep Sleep**: After rendering the QR code, the device goes into deep sleep to save power (27 seconds).
