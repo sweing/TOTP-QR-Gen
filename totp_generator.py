@@ -67,5 +67,5 @@ def generate_totp_qr(device_id: str):
 
 if __name__ == "__main__":
     # Example: Generate QR codes for Alice and Bob
-    generate_totp_qr("alice123")
-    generate_totp_qr("bob456")
+    generate_totp_qr("0001")
+    generate_totp_qr("0002")
