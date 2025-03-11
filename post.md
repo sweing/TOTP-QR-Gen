@@ -2,9 +2,10 @@
 
 The political challenges we face today are particularly pronounced in large-scale systems, which often lack the agility and accountability needed to address complex issues effectively. In contrast, democratic processes tend to thrive at the local level, where stronger community engagement and more adaptable governance structures allow for quicker responses to specific needs. This disparity underscores the importance of shifting focus toward decentralized and localized systems. By empowering communities to maintain autonomy and self-determination, such systems can also serve as a critical counterbalance to the rise of authoritarian tendencies that often emerge in centralized, macro-level governance.
 
-One promising avenue for supporting these decentralized systems lies in the development of technologies like proof of presence (PoP) and proof of location (PoL). PoP verifies that an entity exists at a specific moment in time, creating a foundation for PoL, which confirms the entity’s precise location. This logical progression—from establishing presence to verifying location—provides a clear framework for building trustworthy, localized systems that can operate with integrity and transparency.
+One promising avenue for supporting these decentralized systems lies in the development of technologies like proof of presence (PoP) and proof of location (PoL). PoP verifies that an entity exists at a specific moment in time, creating a foundation for PoL, which confirms the entity’s precise location. This logical progression—from establishing presence to verifying location—provides a clear framework for building trustworthy, localized systems that can operate with integrity and transparency. 
 
 While existing projects exploring decentralized location protocols have shown some potential, they often struggle to deliver practical, scalable solutions. To address these limitations, this project focuses on developing a microcontroller-based open source system to advance PoP technology. The aim is to contribute to the creation of decentralized systems that not only strengthen local governance and community-driven initiatives but also bolster resilience against the centralization of power and the threats posed by authoritarianism.
+
 ---
 
 ### The Idea and its Problems
