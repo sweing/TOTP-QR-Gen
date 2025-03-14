@@ -21,7 +21,7 @@ validation_counts = {}  # Track validation count per TOTP
 def decrypt_totp(key, cipher_text):
     # Ensure the key is 16, 24, or 32 bytes long
     key = key.encode('utf-8')
-    key = key.ljust(32, b'\0')[:32]  # Pad or truncate the key to 32 bytes (256 bits)
+    key = key.ljust(64, b'\0')[:64]  # Pad or truncate the key to 32 bytes (256 bits)
     
     # Create AES cipher in ECB mode
     cipher = AES.new(key, AES.MODE_ECB)
