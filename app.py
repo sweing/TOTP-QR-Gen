@@ -38,7 +38,7 @@ def decrypt_totp(key, cipher_text):
     # Return the plaintext as a string
     return plain_text.decode('utf-8')
 
-@app.route('/validate', methods=['GET'])
+@app.route('/totp/validate', methods=['GET'])
 def validate_totp():
     """Validates the encrypted TOTP from the QR code."""
     device_id = request.args.get('device_id')
@@ -62,27 +62,33 @@ def validate_totp():
         validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "failed", "reason": "Invalid TOTP encryption", "ip": user_ip})
         return jsonify({"success": False, "error": "Invalid TOTP encryption"}), 400
 
+    # Split the decrypted TOTP into TOTP number, latitude, and longitude
+    try:
+        totp_number, lat, lng = decrypted_totp.split('|')
+    except ValueError:
+        validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "failed", "reason": "Invalid TOTP format", "ip": user_ip})
+        return jsonify({"success": False, "error": "Invalid TOTP format"}), 400
+
     # Check if the TOTP has exceeded max validations
-    if decrypted_totp in validation_counts and validation_counts[decrypted_totp] >= MAX_VALIDATIONS:
+    if totp_number in validation_counts and validation_counts[totp_number] >= MAX_VALIDATIONS:
         validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "failed", "reason": "TOTP validation limit reached", "ip": user_ip})
         return jsonify({"success": False, "error": "TOTP validation limit reached"}), 400
 
     # Validate the TOTP
     totp = pyotp.TOTP(secret)
-    if totp.verify(decrypted_totp):
-        validation_counts[decrypted_totp] = validation_counts.get(decrypted_totp, 0) + 1
+    if totp.verify(totp_number):
+        validation_counts[totp_number] = validation_counts.get(totp_number, 0) + 1
         validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "success", "reason": "Valid TOTP", "ip": user_ip})
-        return jsonify({"success": True, "message": "TOTP is valid"}), 200
+        return jsonify({"success": True, "message": "TOTP is valid", "coordinates": {"latitude": lat, "longitude": lng}}), 200
     else:
         validation_logs.append({"timestamp": timestamp, "device_id": device_id, "status": "failed", "reason": "Invalid TOTP", "ip": user_ip})
         return jsonify({"success": False, "error": "Invalid TOTP"}), 400
 
-@app.route('/admin', methods=['GET'])
+@app.route('/totp/admin', methods=['GET'])
 def admin_dashboard():
     """Admin dashboard to view validation logs."""
     return render_template('admin.html', validation_logs=validation_logs, max_validations=MAX_VALIDATIONS)
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5005, debug=True)
-    #app.run(host='0.0.0.0', port=5005)
-
+    # app.run(host='127.0.0.1', port=5005, debug=True)
+    app.run(host='0.0.0.0', port=5005)
