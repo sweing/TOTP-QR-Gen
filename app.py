@@ -19,24 +19,28 @@ validation_logs = []  # Store validation attempts (successful and failed)
 validation_counts = {}  # Track validation count per TOTP
 
 def decrypt_totp(key, cipher_text):
-    # Ensure the key is 16, 24, or 32 bytes long
-    key = key.encode('utf-8')
-    key = key.ljust(64, b'\0')[:64]  # Pad or truncate the key to 32 bytes (256 bits)
-    
-    # Create AES cipher in ECB mode
-    cipher = AES.new(key, AES.MODE_ECB)
-    
-    # Decode the URL-safe base64-encoded ciphertext
-    cipher_text = base64.urlsafe_b64decode(cipher_text)
-    
-    # Decrypt the ciphertext
-    plain_text = cipher.decrypt(cipher_text)
-    
-    # Unpad the plaintext
-    plain_text = unpad(plain_text, AES.block_size)
-    
-    # Return the plaintext as a string
-    return plain_text.decode('utf-8')
+    try:
+        # Ensure the key is 16, 24, or 32 bytes long
+        key = key.encode('utf-8')
+        key = key.ljust(32, b'\0')[:32]  # Pad or truncate the key to 32 bytes (256 bits)
+        
+        # Create AES cipher in ECB mode
+        cipher = AES.new(key, AES.MODE_ECB)
+        
+        # Decode the URL-safe base64-encoded ciphertext
+        cipher_text = base64.urlsafe_b64decode(cipher_text)
+        
+        # Decrypt the ciphertext
+        plain_text = cipher.decrypt(cipher_text)
+        
+        # Unpad the plaintext
+        plain_text = unpad(plain_text, AES.block_size)
+        
+        # Return the plaintext as a string
+        return plain_text.decode('utf-8')
+    except (ValueError, PadError) as e:
+        print(f"Decryption error: {e}")
+        return None
 
 @app.route('/totp/validate', methods=['GET'])
 def validate_totp():
