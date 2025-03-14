@@ -5,7 +5,7 @@
 #include <QRCode_Library.h>
 #include <Wire.h>
 #include <Preferences.h>
-#include <Fonts/FreeMonoBold9pt7b.h>
+#include <Fonts/FreeSansBold9pt7b.h>
 #include <TOTP.h>
 #include <ArduinoBearSSL.h>
 //#include <AES128.h>
@@ -16,12 +16,11 @@
 #include <string.h>
 
 // SETUP
-String baseUrl = "http://192.168.66.185:5000"; // Dynamic base URL
-const char *accountId = "alice123";  // The account ID to be used in the QR code
-const char *key = "JBSWY3DPEHPK3PXP";
-
-
-
+String baseUrl = "http://192.168.114.185:5005"; // Dynamic base URL
+//String baseUrl = "https://nebula.uber.space/totp";
+const char *accountId = "0001";  // The account ID to be used in the QR code
+//const char *key = "JBSWY3DPEHPK3PXP";
+const unsigned char key[32] = "JBSWY3DPEHPK3PXP";
 
 Preferences preferences;
 
@@ -53,7 +52,7 @@ const char* spinnerFrames[] = {"|", "/", "-", "\\"};
 int currentFrame = 0;
 
 unsigned long setupStartTime = millis();
-const unsigned long timeoutDuration = 5 * 60 * 1000; // 5 minutes
+const unsigned long timeoutDuration = 10 * 60 * 1000; // 5 minutes
 const unsigned long animationInterval = 5000; // Update animation every 1 second
 unsigned long lastAnimationUpdate = 0;
 
@@ -65,26 +64,12 @@ String generateTOTP();
 
 String totpCode = String("");
 
-// Function to convert DateTime to Unix timestamp
-unsigned long dateTimeToUnixTimestamp(const DateTime& dt) {
-  tm tmDt;
-  tmDt.tm_year = dt.year() - 1900;
-  tmDt.tm_mon = dt.month() - 1;
-  tmDt.tm_mday = dt.day();
-  tmDt.tm_hour = dt.hour();
-  tmDt.tm_min = dt.minute();
-  tmDt.tm_sec = dt.second();
-  tmDt.tm_isdst = 0; // No daylight saving time
-
-  return mktime(&tmDt);
-}
-
 void setup() {
   Serial.begin(115200);
 
   // Initialize the GPS power control pin
-  pinMode(GPS_POWER_PIN, OUTPUT);
-  digitalWrite(GPS_POWER_PIN, HIGH); // Turn on the GPS module
+  //pinMode(GPS_POWER_PIN, OUTPUT);
+  //digitalWrite(GPS_POWER_PIN, HIGH); // Turn on the GPS module
 
   // Initialize preferences
   preferences.begin("totp", false); // Open NVS namespace "totp" in read/write mode
@@ -96,7 +81,6 @@ void setup() {
   gpsSerial.begin(9600); // Start the GPS serial connection
   SPI.begin(18, -1, 23, -1);  // SCK=18, MISO not used (-1), MOSI=23, CS=-1
   display.init(115200, false, 10, false); // Initialize the e-ink display
-
   // Initialize the RTC
   if (!rtc.begin()) {
     Serial.println("Couldn't find RTC");
@@ -114,6 +98,7 @@ void setup() {
     preferences.putString("totpCode", ""); // Clear the TOTP code in NVS
 
     displaySettingUpMessage();
+    drawOverlay("AB", "CD");
     
     // Wait for GPS to get a fix or timeout
     bool gpsFixAcquired = false;
@@ -134,13 +119,14 @@ void setup() {
           break; // Exit the loop if GPS fix and location are acquired
         }
       }
+      
 
       // Update the spinner animation every second
-      if (millis() - lastAnimationUpdate >= animationInterval) {
-        updateSpinner(currentFrame);
-        currentFrame = (currentFrame + 1) % 4; // Cycle through frames
-        lastAnimationUpdate = millis();
-      }
+//      if (millis() - lastAnimationUpdate >= animationInterval) {
+//        updateSpinner(currentFrame);
+//        currentFrame = (currentFrame + 1) % 4; // Cycle through frames
+//        lastAnimationUpdate = millis();
+//      }
     }
     
     // Check if the GPS fix and location were acquired
@@ -150,12 +136,19 @@ void setup() {
                  gps.time.hour(), gps.time.minute(), gps.time.second()));
       Serial.println("RTC time set from GPS");
 
+      // Save the location to NVS
+      preferences.putFloat("lat", gps.location.lat());
+      preferences.putFloat("lng", gps.location.lng());
+      Serial.print(gps.location.lat(), 6);
+      Serial.print(F(","));
+      Serial.println(gps.location.lng(), 6);
+
       // Calculate the delay to align with the next 30-second interval
       int currentSecond = gps.time.second(); // Get the current second from GPS
       int delaySeconds = (30 - (currentSecond % 30)) % 30; // Calculate remaining seconds
 
       // Turn off the GPS module to save power
-      digitalWrite(GPS_POWER_PIN, LOW);
+      //digitalWrite(GPS_POWER_PIN, LOW);
 
       Serial.println("GPS module turned off.");
       
@@ -164,7 +157,7 @@ void setup() {
           Serial.print("Delaying for ");
           Serial.print(delaySeconds);
           Serial.println(" seconds to align with the next 30-second interval...");
-          delay(delaySeconds * 1000); // Convert seconds to milliseconds
+          // delay(delaySeconds * 1000); // Convert seconds to milliseconds
       }
                 
       // Read the TOTP code from NVS
@@ -194,6 +187,7 @@ void setup() {
 }
 
 void loop() {
+  //Serial.println("waky waky");
   // Get the current time from the RTC
   DateTime currentTime = rtc.now();
 
@@ -204,40 +198,81 @@ void loop() {
   }
 
   // Format and print the time
-  char str[20];   // Declare a string as an array of chars
-  sprintf(str, "%d/%d/%d %d:%d:%d",     // %d allows to print an integer to the string
-          currentTime.year(),   // Get year method
-          currentTime.month(),  // Get month method
-          currentTime.day(),    // Get day method
-          currentTime.hour(),   // Get hour method
-          currentTime.minute(), // Get minute method
-          currentTime.second()  // Get second method
-         );
-
-  // Serial.println(str); // Print the string to the serial port
-
-  // Convert DateTime to Unix timestamp
-  unsigned long unixTime = dateTimeToUnixTimestamp(currentTime);
+//  char str[20];   // Declare a string as an array of chars
+//  sprintf(str, "%d/%d/%d %d:%d:%d",     // %d allows to print an integer to the string
+//          currentTime.year(),   // Get year method
+//          currentTime.month(),  // Get month method
+//          currentTime.day(),    // Get day method
+//          currentTime.hour(),   // Get hour method
+//          currentTime.minute(), // Get minute method
+//          currentTime.second()  // Get second method
+//         );
+  //Serial.println(currentTime.timestamp()); 
+  
   // Generate TOTP code
-  String newCode = String(totp.getCode(unixTime));
+  String newCode = String(totp.getCode(currentTime.unixtime()));
 
   if (totpCode != newCode) {
     totpCode = String(newCode);
-    Serial.print("TOTP code: ");
-    Serial.println(newCode);
+    //Serial.print("TOTP code: ");
+    //Serial.println(newCode);
 
     // Save the TOTP code to NVS
     preferences.putString("totpCode", totpCode);
 
-    const char *plain_text = totpCode.c_str();
-    char output[256];
-    size_t output_len = sizeof(output);
+    // Retrieve latitude and longitude from NVS
+    float lat = preferences.getFloat("lat", 0.0); // Default to 0.0 if not found
+    float lng = preferences.getFloat("lng", 0.0); // Default to 0.0 if not found
 
-    int ret = encrypt_totp(key, plain_text, output, &output_len);
-
-    // Generate the URL with the encrypted TOTP code
-    String url = baseUrl + "/validate?account_id=" + String(accountId) + "&totp_enc=" + String(output);
     
+    // 2. Generate IV
+    uint8_t iv[16];
+    esp_fill_random(iv, 16);
+  
+    // 3. Prepare plaintext
+    char plaintext[128];
+    snprintf(plaintext, sizeof(plaintext), "%s|%f|%f", totpCode, lat, lng);
+    size_t plaintext_len = strlen(plaintext);
+
+    Serial.println(plaintext);
+  
+    // 4. Pad the data
+    unsigned char padded_data[128];
+    size_t padded_len = plaintext_len;
+    memcpy(padded_data, plaintext, plaintext_len);
+    pad_data(padded_data, &padded_len);
+  
+    // 5. Encrypt
+    mbedtls_aes_context aes;
+    mbedtls_aes_init(&aes);
+    mbedtls_aes_setkey_enc(&aes, key, 256);
+    
+    uint8_t ciphertext[padded_len];
+    uint8_t iv_copy[16];
+    memcpy(iv_copy, iv, 16);
+    mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, padded_len, iv_copy, padded_data, ciphertext);
+    mbedtls_aes_free(&aes);
+  
+    // 6. Combine IV + ciphertext
+    uint8_t iv_cipher[16 + padded_len];
+    memcpy(iv_cipher, iv, 16);
+    memcpy(iv_cipher + 16, ciphertext, padded_len);
+  
+    // 7. Base64 encode
+    size_t base64_len;
+    unsigned char base64_output[256];
+    mbedtls_base64_encode(base64_output, sizeof(base64_output), &base64_len, iv_cipher, sizeof(iv_cipher));
+    
+    // URL-safe replacements
+    for (size_t i=0; i<base64_len; i++) {
+      if (base64_output[i] == '+') base64_output[i] = '-';
+      if (base64_output[i] == '/') base64_output[i] = '_';
+    }
+  
+    // 8. Build URL
+    String url = baseUrl + "/validate?device_id=" + String(accountId) + "&data_enc=" + String((char *)base64_output);
+    
+
     // Print the URL to the serial monitor for debugging
     Serial.println("Generated URL: " + url);
 
@@ -245,15 +280,32 @@ void loop() {
     char urlBuffer[150];  // Ensure this buffer is large enough
     url.toCharArray(urlBuffer, sizeof(urlBuffer));
 
+    String firstTwoChars = totpCode.substring(0, 2); // Extract first 2 characters
+    String lastTwoChars = totpCode.substring(totpCode.length() - 2); // Extract last 2 characters
+
     // Draw the QR code on the display
     drawQRCode(urlBuffer);
+
+    drawOverlay(firstTwoChars.c_str(), lastTwoChars.c_str());
 
     // Put the display into low-power mode
     display.hibernate();
 
-    // Enter deep sleep
-    Serial.println("Entering deep sleep...");
-    esp_deep_sleep(27e6); // Sleep for 27 seconds (27e6 microseconds)
+    // Get time again
+    currentTime = rtc.now();
+    int currentSecond = currentTime.second(); // Get the current second from GPS
+    int sleepSeconds = (30 - (currentSecond % 30)) % 30; // Calculate remaining seconds
+
+    // Edge case
+    if (sleepSeconds == 0) {
+      sleepSeconds = 30;
+    }
+
+    // Add 1 additional second to avoid loop running more than once
+    sleepSeconds = sleepSeconds + 1;
+    
+    Serial.println("Entering deep sleep... for " + String(sleepSeconds) + " seconds.");
+    esp_deep_sleep(sleepSeconds * 1000000); // Sleep for 27 seconds (27e6 microseconds)
   }
 }
 
@@ -262,60 +314,6 @@ void pad_data(unsigned char *data, size_t *data_len) {
     size_t padding_len = block_size - (*data_len % block_size);
     memset(data + *data_len, padding_len, padding_len);
     *data_len += padding_len;
-}
-
-int encrypt_totp(const char *key, const char *plain_text, char *output, size_t *output_len) {
-    mbedtls_aes_context aes;
-    unsigned char key_bytes[32];
-    unsigned char plaintext[256];
-    unsigned char ciphertext[256];
-    size_t plaintext_len = strlen(plain_text);
-    size_t ciphertext_len;
-    size_t base64_len;
-    int ret;
-
-    // Ensure the key is 32 bytes long
-    memset(key_bytes, 0, sizeof(key_bytes));
-    size_t key_len = strlen(key);
-    if (key_len > 32) key_len = 32;
-    memcpy(key_bytes, key, key_len);
-
-    // Copy plaintext and pad it
-    memcpy(plaintext, plain_text, plaintext_len);
-    pad_data(plaintext, &plaintext_len);
-
-    // Initialize AES context
-    mbedtls_aes_init(&aes);
-    ret = mbedtls_aes_setkey_enc(&aes, key_bytes, 256);
-    if (ret != 0) {
-        mbedtls_aes_free(&aes);
-        return ret;
-    }
-
-    // Encrypt the plaintext
-    ret = mbedtls_aes_crypt_ecb(&aes, MBEDTLS_AES_ENCRYPT, plaintext, ciphertext);
-    if (ret != 0) {
-        mbedtls_aes_free(&aes);
-        return ret;
-    }
-
-    // Base64 encode the ciphertext
-    ciphertext_len = plaintext_len;  // AES ECB mode preserves length
-    ret = mbedtls_base64_encode((unsigned char *)output, *output_len, &base64_len, ciphertext, ciphertext_len);
-    if (ret != 0) {
-        mbedtls_aes_free(&aes);
-        return ret;
-    }
-
-    // Make the base64 output URL-safe
-    for (size_t i = 0; i < base64_len; i++) {
-        if (output[i] == '+') output[i] = '-';
-        if (output[i] == '/') output[i] = '_';
-    }
-
-    *output_len = base64_len;
-    mbedtls_aes_free(&aes);
-    return 0;
 }
 
 void updateSpinner(int currentFrame) {
@@ -331,16 +329,50 @@ void updateSpinner(int currentFrame) {
     display.fillScreen(GxEPD_WHITE); // Clear the spinner area
     display.setCursor(50, 65 + yOffset); // Move the cursor down by yOffset
     display.setTextColor(GxEPD_BLACK);
-    display.setFont(&FreeMonoBold9pt7b);
+    display.setFont(&FreeSansBold9pt7b);
     display.print(spinnerFrames[currentFrame]); // Print the current frame
   } while (display.nextPage());
 }
+
+void drawOverlay(const char *line1, const char *line2) {
+  // Get screen dimensions
+  uint16_t screenWidth = display.width();
+  uint16_t screenHeight = display.height();
+  
+  // Define overlay dimensions
+  uint16_t overlayHeight = 30;
+  uint16_t overlayWidth = 25;
+
+  // Calculate the top-left corner of the overlay window
+  uint16_t overlayX = (screenWidth - overlayWidth) / 2;  // Top-left X coordinate
+  uint16_t overlayY = (screenHeight - overlayHeight) / 2; // Top-left Y coordinate
+
+  // Set the partial window
+  display.setPartialWindow(overlayX, overlayY, overlayWidth, overlayHeight);
+
+  uint16_t cursor_x = overlayX-2;
+  uint16_t cursor_y1 = overlayY + 13;
+  uint16_t cursor_y2 = overlayY + 27;
+
+  // Display the current frame
+  display.firstPage();
+  do {
+    display.fillScreen(GxEPD_WHITE); // Clear the overlay area
+    display.setTextColor(GxEPD_BLACK);
+    display.setFont(&FreeSansBold9pt7b);
+    display.setCursor(cursor_x, cursor_y1); // Set cursor position for line1
+    display.print(line1);
+    display.setCursor(cursor_x, cursor_y2); // Set cursor position for line2
+    display.print(line2);
+  } while (display.nextPage());
+}
+
 void drawQRCode(const char *text)
 {
   // Create the QR code
   QRCode qrcode;
-  uint8_t qrcodeData[qrcode_getBufferSize(5)];
-  qrcode_initText(&qrcode, qrcodeData, 5, 0, text);
+  uint8_t qrcodeData[qrcode_getBufferSize(6)];
+  qrcode_initText(&qrcode, qrcodeData, 6, 0, text);
   Serial.println("printing qr");
   // Calculate the size of each QR code module (pixel) to fill the screen
   uint16_t screenWidth = display.width();
@@ -379,7 +411,7 @@ void displaySettingUpMessage() {
     display.fillScreen(GxEPD_WHITE);
     display.setCursor(10, 30);
     display.setTextColor(GxEPD_BLACK);
-    display.setFont(&FreeMonoBold9pt7b);
+    display.setFont(&FreeSansBold9pt7b);
     display.println("Searching for GPS signal...");
   } while (display.nextPage());
 }
