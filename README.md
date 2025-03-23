@@ -1,3 +1,5 @@
+# Repo moved to https://github.com/sweing/localproof
+
 # TOTP-QR-Gen
 
 TOTP-QR-Gen is an open-source project that combines a Flask server with an ESP32 microcontroller to provide proof of presence through Time-based One-Time Passwords (TOTP) displayed as QR codes. The project aims to create a secure and decentralized method to verify physical presence using dynamically generated QR codes.
